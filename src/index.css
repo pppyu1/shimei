@@ -1,0 +1,602 @@
+@import "tailwindcss";
+
+@theme {
+  --font-headline: Georgia, "Times New Roman", ui-serif, serif;
+  --font-body: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-label: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --color-surface: #121316;
+  --color-surface-container: #1f1f23;
+  --color-surface-container-low: #1b1b1f;
+  --color-surface-container-high: #292a2d;
+  --color-surface-container-highest: #343538;
+  --color-primary: #e9c349;
+  --color-primary-container: #0d0800;
+  --color-on-surface: #e3e2e6;
+  --color-on-surface-variant: #c7c6cb;
+  --color-secondary: #c6c6c6;
+  --color-outline-variant: #46464b;
+}
+
+:root,
+html[data-theme='obsidian'] {
+  --color-surface: #121316;
+  --color-surface-container: #1f1f23;
+  --color-surface-container-low: #1b1b1f;
+  --color-surface-container-high: #292a2d;
+  --color-surface-container-highest: #343538;
+  --color-primary: #e9c349;
+  --color-primary-container: #0d0800;
+  --color-on-surface: #e3e2e6;
+  --color-on-surface-variant: #c7c6cb;
+  --color-secondary: #c6c6c6;
+  --color-outline-variant: #46464b;
+}
+
+html[data-theme='dawn'] {
+  --color-surface: #f5efe8;
+  --color-surface-container: #ebe2d7;
+  --color-surface-container-low: #f1e8de;
+  --color-surface-container-high: #e2d6c7;
+  --color-surface-container-highest: #d4c5b2;
+  --color-primary: #8c5b22;
+  --color-primary-container: #fff5e7;
+  --color-on-surface: #2f281f;
+  --color-on-surface-variant: #5f5549;
+  --color-secondary: #7a6c5c;
+  --color-outline-variant: #c4b29e;
+}
+
+@layer base {
+  html[data-density='comfortable'] {
+    font-size: 16px;
+  }
+
+  html[data-density='compact'] {
+    font-size: 15px;
+  }
+
+  body {
+    @apply bg-surface text-on-surface font-body selection:bg-primary/30 transition-colors duration-300;
+    min-height: 100dvh;
+  }
+}
+
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.obsidian-texture {
+  background-image: radial-gradient(circle at 2px 2px, rgba(233,195,73,0.02) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.glass-panel {
+  background: rgba(31, 31, 35, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.nebula-glow {
+  background: radial-gradient(circle at center, rgba(233, 195, 73, 0.1) 0%, rgba(18, 19, 22, 0) 70%);
+}
+
+.dream-journal-nightscape {
+  background:
+    radial-gradient(circle at top, rgba(120, 160, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #07101f 0%, #050916 36%, #02040c 74%, #010205 100%);
+}
+
+.dream-journal-theme-dawn {
+  background:
+    radial-gradient(circle at top, rgba(255, 217, 161, 0.28), transparent 32%),
+    linear-gradient(180deg, #fff4e6 0%, #f8e6d2 34%, #f1dcc8 68%, #ead5c5 100%);
+}
+
+.dream-journal-sky {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(124, 157, 255, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(197, 171, 255, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 62%, rgba(69, 110, 214, 0.08), transparent 34%);
+}
+
+.dream-journal-theme-dawn .dream-journal-sky {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 189, 126, 0.24), transparent 28%),
+    radial-gradient(circle at 82% 18%, rgba(255, 216, 189, 0.22), transparent 24%),
+    radial-gradient(circle at 50% 62%, rgba(255, 239, 214, 0.22), transparent 34%);
+}
+
+.dream-journal-milkyway {
+  background:
+    linear-gradient(95deg, rgba(255, 255, 255, 0) 0%, rgba(175, 196, 255, 0.08) 28%, rgba(255, 245, 226, 0.16) 50%, rgba(133, 158, 255, 0.08) 72%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 9999px;
+  filter: blur(28px);
+  opacity: 0.6;
+  transform: rotate(-10deg);
+  animation: dream-journal-milkyway-drift 22s ease-in-out infinite alternate;
+}
+
+.dream-journal-theme-dawn .dream-journal-milkyway {
+  background:
+    linear-gradient(95deg, rgba(255, 255, 255, 0) 0%, rgba(255, 206, 153, 0.14) 26%, rgba(255, 246, 224, 0.32) 50%, rgba(255, 221, 184, 0.16) 74%, rgba(255, 255, 255, 0) 100%);
+  opacity: 0.72;
+  filter: blur(24px);
+}
+
+.dream-journal-glow {
+  border-radius: 9999px;
+  filter: blur(64px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.dream-journal-glow-left {
+  background: radial-gradient(circle, rgba(114, 157, 255, 0.26) 0%, rgba(114, 157, 255, 0) 72%);
+  animation: dream-journal-glow-float 18s ease-in-out infinite alternate;
+}
+
+.dream-journal-theme-dawn .dream-journal-glow-left {
+  background: radial-gradient(circle, rgba(255, 191, 132, 0.28) 0%, rgba(255, 191, 132, 0) 72%);
+}
+
+.dream-journal-glow-right {
+  background: radial-gradient(circle, rgba(196, 173, 255, 0.2) 0%, rgba(196, 173, 255, 0) 72%);
+  animation: dream-journal-glow-float 24s ease-in-out infinite alternate-reverse;
+}
+
+.dream-journal-theme-dawn .dream-journal-glow-right {
+  background: radial-gradient(circle, rgba(255, 233, 191, 0.32) 0%, rgba(255, 233, 191, 0) 72%);
+}
+
+.dream-journal-starfield {
+  transform: translate3d(0, 0, 0);
+}
+
+.dream-journal-star {
+  background: radial-gradient(circle, rgba(255, 252, 244, 1) 0%, rgba(195, 220, 255, 0.9) 68%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 12px rgba(226, 236, 255, 0.16);
+  animation: dream-journal-star-twinkle ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.dream-journal-theme-dawn .dream-journal-star {
+  background: radial-gradient(circle, rgba(255, 248, 236, 0.95) 0%, rgba(255, 224, 188, 0.72) 68%, rgba(255, 255, 255, 0) 100%);
+  box-shadow: 0 0 8px rgba(255, 214, 168, 0.14);
+}
+
+.dream-journal-constellation {
+  opacity: 0.32;
+  overflow: visible;
+}
+
+.dream-journal-constellation-line {
+  fill: none;
+  stroke: rgba(214, 226, 255, 0.65);
+  stroke-width: 0.12;
+  stroke-linecap: round;
+  stroke-dasharray: 0.55 0.45;
+}
+
+.dream-journal-theme-dawn .dream-journal-constellation {
+  opacity: 0.18;
+}
+
+.dream-journal-theme-dawn .dream-journal-constellation-line {
+  stroke: rgba(205, 146, 92, 0.46);
+}
+
+.dream-journal-vignette {
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.03), transparent 30%),
+    linear-gradient(180deg, rgba(1, 3, 9, 0.02) 0%, rgba(1, 3, 9, 0.16) 44%, rgba(0, 0, 0, 0.46) 100%);
+}
+
+.dream-journal-theme-dawn .dream-journal-vignette {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.26), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 241, 226, 0.1) 44%, rgba(152, 97, 53, 0.08) 100%);
+}
+
+.dream-journal-hero-panel,
+.dream-journal-status-card,
+.dream-journal-module-shell {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 80px rgba(1, 6, 20, 0.46);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dream-journal-theme-dawn .dream-journal-hero-panel,
+.dream-journal-theme-dawn .dream-journal-status-card,
+.dream-journal-theme-dawn .dream-journal-module-shell {
+  background: rgba(255, 252, 247, 0.52);
+  border: 1px solid rgba(110, 68, 38, 0.1);
+  box-shadow: 0 24px 72px rgba(173, 120, 73, 0.14);
+}
+
+.dream-journal-hero-panel,
+.dream-journal-module-shell {
+  border-radius: 32px;
+}
+
+.dream-journal-status-card {
+  border-radius: 24px;
+}
+
+@keyframes dream-journal-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate3d(0, 0, 0) scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -1px, 0) scale(1.12);
+  }
+}
+
+@keyframes dream-journal-glow-float {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+
+  to {
+    transform: translate3d(3%, -4%, 0) scale(1.06);
+  }
+}
+
+@keyframes dream-journal-milkyway-drift {
+  from {
+    transform: rotate(-10deg) translate3d(0, 0, 0) scale(1);
+    opacity: 0.52;
+  }
+
+  to {
+    transform: rotate(-8deg) translate3d(2%, -4%, 0) scale(1.04);
+    opacity: 0.72;
+  }
+}
+
+.startup-brand-mark {
+  animation: startup-sequence 2.4s ease-out both;
+  will-change: transform, opacity, filter;
+}
+
+.startup-sky-backdrop {
+  background:
+    radial-gradient(circle at 50% 18%, rgba(233, 195, 73, 0.1), transparent 24%),
+    radial-gradient(circle at 22% 16%, rgba(120, 152, 255, 0.09), transparent 26%),
+    radial-gradient(circle at 76% 28%, rgba(140, 105, 255, 0.08), transparent 22%),
+    linear-gradient(180deg, rgba(5, 7, 14, 1) 0%, rgba(8, 10, 18, 1) 42%, rgba(17, 16, 24, 1) 100%);
+}
+
+.startup-depth-vignette {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 243, 215, 0.03), transparent 32%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.42));
+  mix-blend-mode: screen;
+}
+
+.startup-nebula-layer {
+  opacity: 0.8;
+  will-change: transform, opacity;
+  animation: startup-nebula-drift 18s ease-in-out infinite alternate;
+}
+
+.startup-nebula-layer-a {
+  background: radial-gradient(circle at 24% 28%, rgba(113, 147, 255, 0.16), transparent 30%);
+}
+
+.startup-nebula-layer-b {
+  background: radial-gradient(circle at 72% 18%, rgba(255, 217, 154, 0.12), transparent 26%);
+  animation-duration: 22s;
+  animation-delay: -7s;
+}
+
+.startup-starfield-far {
+  transform: translate3d(0, 0, 0) scale(1.01);
+  opacity: 0.75;
+}
+
+.startup-starfield-mid {
+  animation: startup-parallax-drift 14s linear infinite;
+}
+
+.startup-starfield-near {
+  animation: startup-parallax-drift-near 18s linear infinite;
+}
+
+.startup-star-particle {
+  box-shadow: 0 0 12px rgba(255, 244, 203, 0.18);
+  transform: translate3d(0, 0, 0) scale(var(--star-scale-min, 0.85));
+  animation-name: startup-star-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity, filter;
+}
+
+.startup-star-particle-far {
+  box-shadow: 0 0 10px rgba(198, 220, 255, 0.12);
+}
+
+.startup-star-particle-near {
+  box-shadow: 0 0 18px rgba(255, 235, 180, 0.24);
+}
+
+.moon-glow {
+  background: radial-gradient(circle at center, rgba(233, 195, 73, 0.22) 0%, rgba(233, 195, 73, 0.08) 38%, rgba(233, 195, 73, 0) 72%);
+  filter: blur(10px);
+}
+
+.moon-bloom {
+  background: radial-gradient(circle at center, rgba(255, 241, 192, 0.28) 0%, rgba(255, 241, 192, 0.12) 45%, rgba(255, 241, 192, 0) 72%);
+  filter: blur(16px);
+}
+
+.moon-surface {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 248, 226, 0.95) 0%, rgba(238, 222, 180, 0.9) 32%, rgba(218, 190, 138, 0.86) 68%, rgba(188, 158, 110, 0.82) 100%);
+}
+
+.moon-grain {
+  background-image:
+    radial-gradient(circle at 20% 24%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 74% 36%, rgba(0, 0, 0, 0.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 42% 70%, rgba(0, 0, 0, 0.06) 0 1px, transparent 1px),
+    radial-gradient(circle at 62% 60%, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px);
+  background-size: 16px 16px, 20px 20px, 18px 18px, 24px 24px;
+  mix-blend-mode: soft-light;
+}
+
+.moon-phase-shadow {
+  background: #090b0f;
+  border-radius: 9999px;
+  transform: translateX(0%) scale(1.05);
+  animation: moon-phase-cycle 2.4s linear infinite;
+}
+
+.moon-phase-mask {
+  inset: -4%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 45%, rgba(255, 255, 255, 0.08));
+  mix-blend-mode: screen;
+  transform: rotate(0deg);
+  animation: moon-mask-cycle 2.4s steps(8, end) infinite;
+}
+
+.moon-crater-ring {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.startup-meteor {
+  border-radius: 9999px;
+  box-shadow: 0 0 18px rgba(255, 240, 194, 0.4);
+  transform: translate3d(0, 0, 0) rotate(var(--meteor-angle, 160deg));
+  transform-origin: center center;
+  animation: startup-meteor-pass 8s linear infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes startup-float {
+  from {
+    transform: translate3d(0, 0, 0) scale(0.96);
+    opacity: 0.55;
+  }
+
+  to {
+    transform: translate3d(0, -10px, 0) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes startup-pulse {
+  0%,
+  100% {
+    transform: scale(0.985);
+  }
+
+  50% {
+    transform: scale(1.015);
+  }
+}
+
+@keyframes startup-sequence {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.85);
+    filter: brightness(0.78);
+  }
+
+  33.333% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    filter: brightness(0.82);
+  }
+}
+
+@keyframes startup-star-twinkle {
+  0%,
+  100% {
+    opacity: calc(var(--star-opacity, 0.65) * 0.3);
+    transform: translate3d(0, 0, 0) scale(var(--star-scale-min, 0.85));
+    filter: saturate(0.86) hue-rotate(0deg);
+  }
+
+  50% {
+    opacity: var(--star-opacity, 0.65);
+    transform: translate3d(var(--star-drift-x, 0px), var(--star-drift-y, 0px), 0) scale(var(--star-scale-max, 1.15));
+    filter: saturate(1.18) hue-rotate(var(--star-hue-shift, 0deg));
+  }
+}
+
+@keyframes startup-parallax-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.02);
+  }
+
+  to {
+    transform: translate3d(-2%, 1.4%, 0) scale(1.04);
+  }
+}
+
+@keyframes startup-parallax-drift-near {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.03);
+  }
+
+  to {
+    transform: translate3d(-3%, 1.8%, 0) scale(1.06);
+  }
+}
+
+@keyframes startup-nebula-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.5;
+  }
+
+  to {
+    transform: translate3d(2.5%, -2%, 0) scale(1.08);
+    opacity: 0.88;
+  }
+}
+
+@keyframes moon-phase-cycle {
+  0% {
+    transform: translateX(108%) scale(1.05);
+  }
+
+  12.5% {
+    transform: translateX(72%) scale(1.05);
+  }
+
+  25% {
+    transform: translateX(36%) scale(1.05);
+  }
+
+  37.5% {
+    transform: translateX(0%) scale(1.05);
+  }
+
+  50% {
+    transform: translateX(-108%) scale(1.05);
+  }
+
+  62.5% {
+    transform: translateX(-72%) scale(1.05);
+  }
+
+  75% {
+    transform: translateX(-36%) scale(1.05);
+  }
+
+  87.5% {
+    transform: translateX(0%) scale(1.05);
+  }
+
+  100% {
+    transform: translateX(108%) scale(1.05);
+  }
+}
+
+@keyframes moon-mask-cycle {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.16;
+  }
+
+  100% {
+    transform: rotate(720deg);
+    opacity: 0.06;
+  }
+}
+
+@keyframes startup-meteor-pass {
+  0%,
+  12%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(var(--meteor-angle, 160deg)) scaleX(0.75);
+  }
+
+  16% {
+    opacity: var(--meteor-opacity, 0.88);
+  }
+
+  82% {
+    opacity: var(--meteor-opacity, 0.88);
+    transform: translate3d(var(--meteor-travel-x, -540px), var(--meteor-travel-y, 180px), 0) rotate(var(--meteor-angle, 160deg)) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--meteor-travel-x, -540px) * 1.06), calc(var(--meteor-travel-y, 180px) * 1.06), 0)
+      rotate(var(--meteor-angle, 160deg)) scaleX(1.04);
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-journal-milkyway {
+    filter: blur(22px);
+    opacity: 0.48;
+  }
+
+  .dream-journal-glow {
+    filter: blur(44px);
+    opacity: 0.34;
+  }
+
+  .dream-journal-constellation {
+    opacity: 0.22;
+  }
+
+  .startup-nebula-layer {
+    opacity: 0.64;
+  }
+
+  .startup-starfield-near {
+    animation-duration: 22s;
+  }
+
+  .startup-meteor {
+    box-shadow: 0 0 14px rgba(255, 240, 194, 0.34);
+  }
+}
+
+html.reduce-motion .startup-brand-mark,
+html.reduce-motion .startup-nebula-layer,
+html.reduce-motion .startup-starfield-mid,
+html.reduce-motion .startup-starfield-near,
+html.reduce-motion .startup-star-particle,
+html.reduce-motion .startup-meteor,
+html.reduce-motion .dream-journal-milkyway,
+html.reduce-motion .dream-journal-glow-left,
+html.reduce-motion .dream-journal-glow-right,
+html.reduce-motion .dream-journal-star {
+  animation: none !important;
+}
