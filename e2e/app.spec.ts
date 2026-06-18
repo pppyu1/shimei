@@ -4,9 +4,9 @@ test.describe('Shimei App Core Flows', () => {
   test('should load the home page and show continue listening card', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: 'Sanctuary' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '晚上好，Elena' })).toBeVisible();
-    await expect(page.getByText('继续播放')).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /好/ })).toBeVisible();
+    await expect(page.getByRole('main').getByText('继续播放', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 3, name: '窗畔轻雨' })).toBeVisible();
   });
 
   test('should navigate between modules using BottomNav', async ({ page }) => {
@@ -19,8 +19,8 @@ test.describe('Shimei App Core Flows', () => {
     await expect(page.getByText('准备')).toBeVisible();
 
     await page.getByRole('button', { name: '我的' }).click();
-    await expect(page.getByText('账号与数据同步')).toBeVisible();
-    await expect(page.getByText('晨间梦境记录')).toBeVisible();
+    await expect(page.getByText('账号与数据同步（Supabase）')).toBeVisible();
+    await expect(page.getByText('设置与偏好')).toBeVisible();
   });
 
   test('should support hash routes and player deep links', async ({ page }) => {
@@ -30,12 +30,15 @@ test.describe('Shimei App Core Flows', () => {
     await page.goto('/#/home/player/sleep-story-interstellar-v1');
     await expect(page.getByText('正在播放')).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: '窗畔轻雨' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sanctuary' })).toBeVisible();
   });
 
   test('should open player from home and show timer and offline actions', async ({ page }) => {
     await page.goto('/');
 
-    await page.getByText('继续播放').click();
+    const continueCard = page.locator('div.cursor-pointer').filter({ hasText: '继续播放' }).first();
+    await continueCard.scrollIntoViewIfNeeded();
+    await continueCard.click();
 
     await expect(page.getByText('正在播放')).toBeVisible();
     await expect(page.getByRole('heading', { level: 2, name: '窗畔轻雨' })).toBeVisible();
@@ -47,7 +50,7 @@ test.describe('Shimei App Core Flows', () => {
     await expect(page.getByText('剩余 30:00')).toBeVisible();
 
     await page.getByRole('button').filter({ has: page.locator('svg.lucide-chevron-left') }).click();
-    await expect(page.getByRole('heading', { name: '晚上好，Elena' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 2, name: /好/ })).toBeVisible();
   });
 
   test('should interact with the Nature mixer', async ({ page }) => {

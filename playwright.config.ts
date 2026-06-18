@@ -13,12 +13,18 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'desktop-edge',
-      use: { ...devices['Desktop Chrome'], channel: 'msedge' },
+      name: 'desktop-chrome',
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.CI ? {} : { channel: 'msedge' }),
+      },
     },
     {
-      name: 'mobile-edge',
-      use: { ...devices['Pixel 5'], channel: 'msedge' },
+      name: 'mobile-chrome',
+      use: {
+        ...devices['Pixel 5'],
+        ...(process.env.CI ? {} : { channel: 'msedge' }),
+      },
     },
   ],
   webServer: {

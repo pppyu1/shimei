@@ -6,6 +6,8 @@ import { featuredJourneys } from '../home/data';
 import { defaultPreferences } from '../../lib/preferences';
 
 vi.mock('../../lib/supabase', () => ({
+  isSupabaseBrowserConfigured: false,
+  isSupabaseDevProxyEnabled: false,
   supabase: {
     auth: {
       signInWithOtp: vi.fn(),

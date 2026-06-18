@@ -1,12 +1,13 @@
+import type { MouseEvent, PointerEvent } from 'react';
 import { Menu, Settings } from 'lucide-react';
 
 const createPressHandlers = (onPress: () => void) => ({
-  onPointerUp: (event: React.PointerEvent<HTMLButtonElement>) => {
+  onPointerUp: (event: PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     onPress();
   },
-  onClick: (event: React.MouseEvent<HTMLButtonElement>) => {
+  onClick: (event: MouseEvent<HTMLButtonElement>) => {
     if (event.detail !== 0) {
       return;
     }
