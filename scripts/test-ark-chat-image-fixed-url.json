@@ -1,0 +1,20 @@
+{
+  "model": "doubao-seed-2-0-pro-260215",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://ark-project.tos-cn-beijing.volces.com/doc_image/ark_demo_img_1.png"
+          }
+        },
+        {
+          "type": "text",
+          "text": "图片主要讲了什么?"
+        }
+      ]
+    }
+  ]
+}

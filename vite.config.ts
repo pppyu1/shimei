@@ -2,12 +2,15 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
+import {createSupabaseDevProxy} from './server/supabase-dev-proxy';
+import {createVolcengineSpeechProxy} from './server/volcengine-speech-proxy';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  const devPlugins = mode === 'development' ? [createSupabaseDevProxy(env)] : [];
   return {
     base: './',
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), ...devPlugins, createVolcengineSpeechProxy(env)],
     build: {
       cssCodeSplit: false,
       rollupOptions: {

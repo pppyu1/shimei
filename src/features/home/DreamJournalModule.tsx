@@ -13,12 +13,26 @@ import {
   filterDreamEntries,
   loadDreamJournalStore,
   persistDreamJournalStore,
-  supportsSpeechRecognition,
   type DreamAttachment,
   type DreamEntry,
   type DreamJournalStore,
   type DreamTheme,
 } from '../../lib/dream-journal';
+import {
+  buildSpeechEditorHtml,
+  createDreamSpeechRecognizer,
+  supportsSpeechRecognition,
+  type DreamSpeechRecognizer,
+} from '../../lib/speech-to-text';
+import {
+  createVolcengineDreamSpeechRecognizer,
+  getSpeechListeningStatus,
+  getSpeechProviderLabel,
+  isVolcengineSpeechEnabled,
+  resolveSpeechProvider,
+  type ResolvedSpeechProvider,
+} from '../../lib/volcengine-speech-client';
+import { createVolcengineStreamingAsrRecognizer } from '../../lib/volcengine-streaming-asr-client';
 
 const reminderVoices = [
   '慢慢回想今晨最先浮现的画面。',
@@ -99,6 +113,11 @@ export const DreamJournalModule = ({
   const editorRef = useRef<HTMLDivElement | null>(null);
   const reminderTimeoutRef = useRef<number | null>(null);
   const selectionRef = useRef<Range | null>(null);
+  const speechRecognizerRef = useRef<DreamSpeechRecognizer | null>(null);
+  const speechProviderModeRef = useRef<ResolvedSpeechProvider['mode'] | ''>('');
+  const speechBaseHtmlRef = useRef('');
+  const speechFinalizedRef = useRef<string[]>([]);
+  const speechInterimRef = useRef('');
   const [store, setStore] = useState<DreamJournalStore>(defaultDreamJournalStore);
   const [entries, setEntries] = useState<DreamEntry[]>([]);
   const [status, setStatus] = useState('');
@@ -112,6 +131,7 @@ export const DreamJournalModule = ({
   const [jumpDate, setJumpDate] = useState('');
   const [timelineTheme, setTimelineTheme] = useState<DreamTheme | 'all'>('all');
   const [voiceListening, setVoiceListening] = useState(false);
+  const [speechProvider, setSpeechProvider] = useState<ResolvedSpeechProvider | null>(null);
   const [loading, setLoading] = useState(false);
   const {
     moduleShellClass,
@@ -144,12 +164,32 @@ export const DreamJournalModule = ({
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    void resolveSpeechProvider().then((provider) => {
+      if (cancelled) return;
+      setSpeechProvider(provider);
+      if (provider.mode === 'browser' && isVolcengineSpeechEnabled() && provider.status) {
+        setStatus(provider.status.message);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     const handleSelectionChange = () => {
       saveSelection();
     };
 
     document.addEventListener('selectionchange', handleSelectionChange);
     return () => document.removeEventListener('selectionchange', handleSelectionChange);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      speechRecognizerRef.current?.stop();
+    };
   }, []);
 
   useEffect(() => {
@@ -361,30 +401,105 @@ export const DreamJournalModule = ({
     setLoading(false);
   };
 
-  const startSpeech = async () => {
+  const applySpeechToEditor = (interim: string) => {
+    if (!editorRef.current) return;
+    editorRef.current.innerHTML = buildSpeechEditorHtml(speechBaseHtmlRef.current, speechFinalizedRef.current, interim);
+  };
+
+  const resetSpeechSession = () => {
+    speechBaseHtmlRef.current = '';
+    speechFinalizedRef.current = [];
+    speechInterimRef.current = '';
+  };
+
+  const beginSpeechSession = () => {
+    speechBaseHtmlRef.current = getEditorHtml();
+    speechFinalizedRef.current = [];
+    speechInterimRef.current = '';
+  };
+
+  const finalizeSpeechSession = () => {
+    if (speechInterimRef.current.trim()) {
+      speechFinalizedRef.current.push(speechInterimRef.current.trim());
+      speechInterimRef.current = '';
+    }
+    applySpeechToEditor('');
+  };
+
+  const ensureSpeechRecognizer = async () => {
+    const provider = await resolveSpeechProvider();
+    setSpeechProvider(provider);
+
+    const callbacks = {
+      onTranscript: ({ interim, finalSegment }: { interim: string; finalSegment: string }) => {
+        if (finalSegment) {
+          const trimmed = finalSegment.trim();
+          const last = speechFinalizedRef.current.at(-1);
+          if (trimmed && trimmed !== last) {
+            speechFinalizedRef.current.push(trimmed);
+          }
+          speechInterimRef.current = '';
+        } else {
+          speechInterimRef.current = interim;
+        }
+        applySpeechToEditor(speechInterimRef.current);
+
+        if (interim) {
+          setStatus(`正在聆听：${interim}`);
+        } else if (finalSegment) {
+          setStatus('语音内容已写入编辑器。');
+        }
+      },
+      onError: (message: string) => setStatus(message),
+      onEmpty: () =>
+        setStatus('未检测到有效语音内容。请靠近麦克风、提高音量，并确认浏览器已允许麦克风权限。'),
+      onStateChange: (listening: boolean) => setVoiceListening(listening),
+    };
+
+    if (speechRecognizerRef.current && speechProviderModeRef.current === provider.mode) {
+      return { recognizer: speechRecognizerRef.current, provider };
+    }
+
+    speechRecognizerRef.current?.stop();
+    speechRecognizerRef.current =
+      provider.mode === 'asr'
+        ? createVolcengineStreamingAsrRecognizer(callbacks)
+        : provider.mode === 'ark-speech'
+          ? createVolcengineDreamSpeechRecognizer(callbacks)
+          : createDreamSpeechRecognizer(callbacks);
+    speechProviderModeRef.current = provider.mode;
+
+    return { recognizer: speechRecognizerRef.current, provider };
+  };
+
+  const toggleSpeech = async () => {
     if (!supportsSpeechRecognition()) {
-      setStatus('当前浏览器不支持语音转文字。');
+      setStatus('当前浏览器不支持语音转文字，请使用 Chrome 或 Edge。');
       return;
     }
 
-    const SpeechRecognitionCtor =
-      (window as typeof window & { SpeechRecognition?: any }).SpeechRecognition ||
-      (window as typeof window & { webkitSpeechRecognition?: any }).webkitSpeechRecognition;
-    const recognition = new SpeechRecognitionCtor();
-    recognition.lang = 'zh-CN';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-    setVoiceListening(true);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results?.[0]?.[0]?.transcript;
-      if (editorRef.current && transcript) {
-        editorRef.current.innerHTML = `${getEditorHtml()}<p>${transcript}</p>`;
-      }
-      setStatus('语音内容已加入编辑器。');
-    };
-    recognition.onerror = () => setStatus('语音识别失败，请重试。');
-    recognition.onend = () => setVoiceListening(false);
-    recognition.start();
+    const { recognizer, provider } = await ensureSpeechRecognizer();
+
+    if (voiceListening) {
+      recognizer.stop();
+      setStatus('正在完成识别，请稍候…');
+      return;
+    }
+
+    beginSpeechSession();
+    editorRef.current?.focus();
+    setStatus('正在请求麦克风权限…');
+    try {
+      await recognizer.start();
+      setStatus(getSpeechListeningStatus(provider));
+    } catch (error) {
+      speechRecognizerRef.current = null;
+      speechProviderModeRef.current = '';
+      resetSpeechSession();
+      const message = error instanceof Error ? error.message : '无法启动语音识别';
+      setStatus(message);
+      setVoiceListening(false);
+    }
   };
 
   const saveEntry = async () => {
@@ -534,9 +649,12 @@ export const DreamJournalModule = ({
                 <ToolbarButton icon={Wand2} label="加粗" onClick={applyInlineFormat.bind(null, 'strong')} activeClassName={chipActiveClass} idleClassName={chipIdleClass} />
                 <ToolbarButton icon={Sparkles} label="斜体" onClick={applyInlineFormat.bind(null, 'em')} activeClassName={chipActiveClass} idleClassName={chipIdleClass} />
                 <ToolbarButton icon={Tags} label="列表" onClick={applyUnorderedList} activeClassName={chipActiveClass} idleClassName={chipIdleClass} />
-                <ToolbarButton icon={Mic} label={voiceListening ? '录音中' : '语音转文字'} onClick={startSpeech} active={voiceListening} activeClassName={chipActiveClass} idleClassName={chipIdleClass} />
+                <ToolbarButton icon={Mic} label={voiceListening ? '停止录音' : '语音转文字'} onClick={() => void toggleSpeech()} active={voiceListening} activeClassName={chipActiveClass} idleClassName={chipIdleClass} />
               </div>
             </div>
+            {speechProvider && (
+              <p className={`text-xs ${secondaryTextClass}`}>{getSpeechProviderLabel(speechProvider)}</p>
+            )}
 
             <div
               ref={editorRef}

@@ -413,7 +413,6 @@ export const fileToAttachment = async (file: File) => {
   } satisfies DreamAttachment;
 };
 
-export const supportsSpeechRecognition = () =>
-  typeof window !== 'undefined' && Boolean((window as typeof window & { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition || (window as typeof window & { SpeechRecognition?: unknown }).SpeechRecognition);
+export { supportsSpeechRecognition } from './speech-to-text';
 
 export const supportsBiometricPrompt = () => typeof window !== 'undefined' && 'PublicKeyCredential' in window;

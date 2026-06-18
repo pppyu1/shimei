@@ -6,7 +6,7 @@ import { featuredJourneys } from '../home/data';
 import { formatTime } from '../player/model';
 import type { PlayerContent } from '../shared/types';
 import { addFavorite, fetchDreamJournals, fetchFavorites, fetchPlayHistory, removeFavorite, syncPlayHistory } from '../../lib/api';
-import { isSupabaseBrowserConfigured, supabase } from '../../lib/supabase';
+import { isSupabaseBrowserConfigured, isSupabaseDevProxyEnabled, supabase } from '../../lib/supabase';
 import { tryExplainFetchFailure } from '../../lib/supabaseErrors';
 import { pingSupabaseAuthHealth } from '../../lib/supabaseReachability';
 import { isAdmin } from '../../lib/admin';
@@ -144,16 +144,22 @@ export const MeView = ({
 
   const testSupabaseReachability = async () => {
     if (!isSupabaseBrowserConfigured) {
-      setStatus('未配置 Supabase，无法测试连接。');
+      setStatus('未配置 Supabase，无法测试连接。请在 .env.local 设置 VITE_SUPABASE_URL 与 VITE_SUPABASE_ANON_KEY。');
       return;
     }
     setPingLoading(true);
     setStatus('');
-    const url = import.meta.env.VITE_SUPABASE_URL?.trim() ?? '';
+    const url = isSupabaseDevProxyEnabled()
+      ? `${window.location.origin}/supabase-proxy`
+      : (import.meta.env.VITE_SUPABASE_URL?.trim() ?? '');
     const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ?? '';
-    const { ok, userMessage } = await pingSupabaseAuthHealth(url, key);
+    const { userMessage } = await pingSupabaseAuthHealth(url, key);
     setPingLoading(false);
-    setStatus(userMessage);
+    setStatus(
+      isSupabaseDevProxyEnabled() && userMessage.startsWith('连接失败')
+        ? `${userMessage}（当前经 localhost 代理访问上游项目）`
+        : userMessage,
+    );
   };
 
   const canUsePasswordAuth = typeof (supabase as any)?.auth?.signUp === 'function' && typeof (supabase as any)?.auth?.signInWithPassword === 'function';
@@ -373,7 +379,15 @@ export const MeView = ({
                 发送密码重置邮件
               </button>
             )}
-            <p className="text-xs text-on-surface-variant">未配置 Supabase 时，仅 OTP 演示可用，其它方式会提示配置要求。</p>
+            {!isSupabaseBrowserConfigured ? (
+              <p className="text-xs text-on-surface-variant">
+                未配置 Supabase（缺少 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY），密码登录不可用；配置后请重启 dev 服务器。
+              </p>
+            ) : (
+              <p className="text-xs text-on-surface-variant">
+                已配置 Supabase{isSupabaseDevProxyEnabled() ? '（本地开发代理已开启）' : ''}。若发送失败，先点「测试与 Supabase 的连接」。
+              </p>
+            )}
           </div>
         ) : (
             <div className="space-y-3">
